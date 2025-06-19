@@ -15,17 +15,13 @@ struct Node {
 };
 
 struct MFU_Cache {
-    vector<vector<Node*>> save;
     unordered_map<int, Node*> cacheMap;
-    int Max;
     int sz;
     int lim;
-    int Max_num_inter;
     Node *head;
     Node *tail;
 
-    MFU_Cache(int LIM) : Max(0), sz(0), lim(LIM), head(nullptr), tail(nullptr) {
-        save = vector<vector<Node*>>(5);
+    MFU_Cache(int LIM) : sz(0), lim(LIM), head(nullptr), tail(nullptr) {
     }
 
     void removeNode(Node* node) {
@@ -53,23 +49,15 @@ struct MFU_Cache {
     }
 
     void del_Max() {
-        Node *need_del;
-        bool ok = 0;
-        while (!ok) {
-            if (save[Max].size() == 0) {
-                Max--;
-                continue;
-            }
-            Node *tmp = save[Max].back();
-            if (tmp->cnt == Max) {
-                ok = 1;
-                need_del = tmp;
-            }
-            save[Max].pop_back();
+        Node *cur=head;
+        Node *Max=head;
+        while(cur)
+        {
+        if(Max->cnt<=cur->cnt)Max=cur;
+        cur=cur->next;
         }
-        cacheMap.erase(need_del->key);
-        need_del->cnt = 0;
-        removeNode(need_del);
+        cacheMap.erase(Max->key);
+        removeNode(Max);
     }
 
     void putCache(int key, string value) {
@@ -77,9 +65,6 @@ struct MFU_Cache {
         if (it != cacheMap.end()) {
             Node *node = (*it).second;
             node->cnt++;
-            if (Max < node->cnt) Max = node->cnt;
-            if (Max > save.size() - 2) save.push_back(vector<Node*>(0));
-            save[node->cnt].push_back(node);
             moveNodeToHead(node);
         } else {
             if (sz == lim) {
@@ -89,9 +74,6 @@ struct MFU_Cache {
             addNodeToHead(node);
             cacheMap[key] = node;
             node->cnt = 1;
-            if (Max < node->cnt) Max = node->cnt;
-            if (Max > save.size() - 2) save.push_back(vector<Node*>(0));
-            save[node->cnt].push_back(node);
         }
     }
 
@@ -100,9 +82,6 @@ struct MFU_Cache {
         if (it != cacheMap.end()) {
             Node *node = (*it).second;
             node->cnt++;
-            if (Max < node->cnt) Max = node->cnt;
-            if (Max > save.size() - 2) save.push_back(vector<Node*>(0));
-            save[node->cnt].push_back(node);
             moveNodeToHead(node);
         }
     }
